@@ -14,7 +14,6 @@ all: $(TARGET)
 $(TARGET): $(OBJECTS)
 	$(CXX) $(CPPFLAGS) -o $(TARGET) $(OBJECTS) $(LDFLAGS) $(LDLIBS)
 
-# ver3.o, ver4.o와 같은 파일 생성
 ver3.o: ver3.cu
 	$(NVCC) $(CUDA_CFLAGS) -c -o $@ $^
 
