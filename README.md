@@ -5,16 +5,16 @@ optimizing cuda matmul kernel from scratch. </br>
 
 ## 🗂️ 파일 구조
 ```
-main.c
+main.cpp
 │
 ├── utils.h
-│   └── utils.c
+│   └── utils.cpp
 │
 └── matmul.h
-    ├── matmul.c
-    ├── ver3.c
-    ├── ver4.c
-    └── ver5.c
+    ├── matmul.cu
+    ├── ver3.cu
+    ├── ver4.cu
+    └── ver5.cu
 ```
 </br>
 
