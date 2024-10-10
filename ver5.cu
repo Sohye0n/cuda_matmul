@@ -14,13 +14,13 @@ __global__ void mul5(float* A, float* B, float* C, int M, int N, int K, int alph
     
     float AsReg[TM * bkSize];
     float BsReg[bkSize * TN];
-    float threadResults[bmSize * bnSize];
+    float threadResults[TM * TN];
 
-    int threadCol = threadIdx.x / (bnSize / TN);
-    int threadRow = threadIdx.y / (bnSize / TN);
+    int threadCol = threadIdx.x % (bnSize);
+    int threadRow = threadIdx.x / (bnSize);
 
     //이 블록에서 계산해야 하는 C의 원소 개수
-    int numResultsPerBlock = bmSize * bnSize;
+    int numResultsPerBlock = 32 * 32;
     //한 스레드에서 계산하길 원하는 C 원소 개수 (2D tiling)
     int numResultsPerThread = TM * TN;
     //블록당 스레드 개수
@@ -39,17 +39,18 @@ __global__ void mul5(float* A, float* B, float* C, int M, int N, int K, int alph
     //0. 포인터를 시작점으로
     A += blockIdx.y * K * bmSize;
     B += blockIdx.x * bnSize;
-    C += blockIdx.y * K * bmSize + blockIdx.x * bnSize;
+    C += blockIdx.y * N * bmSize + blockIdx.x * bnSize;
+    if(threadCol ==0 && threadRow ==0 && blockIdx.x == 0) printf("start\n");
 
     for(int i=0; i<K; i+=bkSize){
-        
         for(int j=0; j<bmSize; j+=strideA){
            As[(innerRowA + j) * bkSize + innerColA] = A[(innerRowA + j) * K + innerColA]; 
         }
         for(int j=0; j<bkSize; j+=strideB){
-            Bs[(innerRowB+j)*bnSize + innerColB] = B[(innerRowB + j)*K + innerColB];
+            Bs[(innerRowB+j)*bnSize + innerColB] = B[(innerRowB + j)*N + innerColB];
         }
         __syncthreads();
+ 
         A += bkSize;
         B += bkSize * N;
         float cur;
@@ -61,16 +62,17 @@ __global__ void mul5(float* A, float* B, float* C, int M, int N, int K, int alph
                 AsReg[i] = As[(threadRow * TM + i) * bkSize + dotIdx];
             }
             for(int j=0; j<TN; ++j){
-                BsReg[j] = Bs[threadCol * TN + dotIdx * bnSize + j];
+                BsReg[j] = Bs[threadCol * TN + dotIdx + j * bnSize];
             }
 
             for(int r=0; r<TM; r++){
-                cur = AsReg[i];
+                cur = AsReg[r];
                 for(int c=0; c<TN; c++){
-                    threadResults[r*TM + TN] += cur*BsReg[c];
+                    threadResults[r * TN + c] += cur*BsReg[c];
                 }
             }
         }
+
         __syncthreads();
     }
 
@@ -94,13 +96,15 @@ void mul55(float*A, float* B, int M, int N, int K, int alpha, int beta){
     const int bnSize = blockSize / TN;
     const int bmSize = blockSize / TN;
     dim3 gridDim = dim3(CEIL_DIV(N, blockSize), CEIL_DIV(M,blockSize));
-    dim3 blockDim = dim3(bmSize * bnSize);
+    dim3 blockDim = dim3(bkSize * bnSize);
 
     //Device memory로 값 복사
     matmul_memcpy_toDevice(A, B, M, N, K);
 
+    printf("mul55\n");
+    printf("bm : %d, bn : %d, bk : %d, TM : %d, TN : %d\n",bmSize, bnSize, bkSize, TM, TN);
     //연산 수행
-    mul5<bmSize, bnSize, bkSize, TM, TN><<<gridDim, blockDim, 2*sizeof(float)*32*bkSize>>>(A_gpu, B_gpu, C_gpu, M, N, K, alpha, beta);
+    mul5<bmSize, bnSize, bkSize, TM, TN><<<gridDim, blockDim, 2*sizeof(float)*bmSize*bkSize>>>(A_gpu, B_gpu, C_gpu, M, N, K, alpha, beta);
 
     //Host memory로 정답 복사
     matmul_memcpy_toHost(M, N);
