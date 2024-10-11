@@ -13,6 +13,11 @@ __global__ void mul4(float* A, float* B, float* C, int M, int N, int K, int alph
     float* As = sharedMem;
     float* Bs = sharedMem + bmSize * bkSize;
     float threadResults[bmSize * bkSize];
+    for(int i=0; i<bkSize; i++){
+        for(int j=0; j<bmSize; j++){
+            threadResults[i*bmSize+j] = 0.0;
+        }
+    }
 
     int threadCol = threadIdx.x % bnSize;
     int threadRow = threadIdx.x / bnSize;
@@ -25,7 +30,7 @@ __global__ void mul4(float* A, float* B, float* C, int M, int N, int K, int alph
     //0. 포인터를 시작점으로 이동
     A += blockIdx.y * K * bmSize;
     B += blockIdx.x * bnSize;
-    C += blockIdx.y * K * bmSize + blockIdx.x * bnSize;
+    C += blockIdx.y * N * bmSize + blockIdx.x * bnSize;
 
     for(int i=0; i<K; i+=bkSize){
 
