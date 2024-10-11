@@ -40,7 +40,7 @@ main.cpp
 #### ver5
 - 2D tiling
 
-#### ver6 🚧 ongoing
+#### ver6 (🚧 ongoing)
 - vectorize GMem & SMem access
 </br>
 
