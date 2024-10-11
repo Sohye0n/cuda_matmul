@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
   double elapsed_time = get_current_time() - start_time;
   printf("done!\n");
 
-  /* Print results */
+  /* 결과 비교 */
   printf("C result : \n");
   compare_result(A, B, C_cpu, M, N, K);
   printf("Elapsed time: %.3f sec\n", elapsed_time);

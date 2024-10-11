@@ -60,10 +60,10 @@ void compare_result(float* A, float* B, float* C, int M, int N, int K){
     printf("ans : %f, matmul result : %f\n",ans, C[0*N+2]);
 
 
-    //C[10][20]
+    //C[95][63]
     ans = 0.0f;
     for(int i=0; i<K; i++){
-        ans+=A[10*K+i]*B[i*N+20];
+        ans+=A[95*K+i]*B[i*N+63];
     }
-    printf("ans : %f, matmul result : %f\n",ans, C[10*N+20]);
+    printf("ans : %f, matmul result : %f\n",ans, C[95*N+63]);
 }
