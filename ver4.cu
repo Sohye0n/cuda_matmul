@@ -64,19 +64,20 @@ __global__ void mul4(float* A, float* B, float* C, int M, int N, int K, int alph
 
 
 void mul44(float* A, float* B, int M, int N, int K, int alpha, int beta){
-    const int blockSize = 32;
-    const int TM = 4;
+    //32 배수로 설정 가능
+    const int blockSize = 64;
+    const int TM = 8;
     assert(blockSize % TM ==0);
 
     const int bkSize = blockSize / TM;
     dim3 gridDim = dim3(CEIL_DIV(N,blockSize), CEIL_DIV(M,blockSize));
-    dim3 blockDim = dim3(32 * bkSize);
+    dim3 blockDim = dim3(64 * bkSize);
 
     //Device memory로 값 복사
     matmul_memcpy_toDevice(A, B, M, N, K);
 
     //연산 수행
-    mul4<32, 32, bkSize, TM><<<gridDim, blockDim, 2*sizeof(float)*32*bkSize>>>(A_gpu, B_gpu, C_gpu, M, N, K, alpha, beta);
+    mul4<blockSize, blockSize, bkSize, TM><<<gridDim, blockDim, 2*sizeof(float)*blockSize*bkSize>>>(A_gpu, B_gpu, C_gpu, M, N, K, alpha, beta);
 
     //Host memory로 정답 복사
     matmul_memcpy_toHost(M, N);
