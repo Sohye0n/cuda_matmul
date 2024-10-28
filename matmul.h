@@ -27,5 +27,6 @@ void matmul_cleanup();
 void mul33(float* A, float* B, int M, int N, int K, int alpha, int beta);
 void mul44(float* A, float* B, int M, int N, int K, int alpha, int beta);
 void mul55(float* A, float* B, int M, int N, int K, int alpha, int beta);
+void mul66(float* A, float* B, int M, int N, int K, int alpha, int beta);
 
 /*----- matmul interface -----*/

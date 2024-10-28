@@ -1,5 +1,5 @@
 TARGET=main
-OBJECTS=main.o util.o matmul.o ver3.o ver4.o ver5.o
+OBJECTS=main.o util.o matmul.o ver3.o ver4.o ver5.o ver6.o
 
 CPPFLAGS=-std=c++14 -O3 -Wall -march=native -mavx2 -mfma -fopenmp -mno-avx512f -I/usr/local/cuda/include
 CUDA_CFLAGS=-std=c++14 -O3 -Xcompiler -Wall -Xcompiler -march=native -Xcompiler -mavx2 -Xcompiler -mfma -Xcompiler -fopenmp -Xcompiler -mno-avx512f -I/usr/local/cuda/include
@@ -21,6 +21,9 @@ ver4.o: ver4.cu
 	$(NVCC) $(CUDA_CFLAGS) -c -o $@ $^
 
 ver5.o: ver5.cu
+	$(NVCC) $(CUDA_CFLAGS) -c -o $@ $^
+
+ver6.o: ver6.cu
 	$(NVCC) $(CUDA_CFLAGS) -c -o $@ $^
 
 # matmul.o 생성

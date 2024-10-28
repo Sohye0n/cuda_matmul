@@ -56,6 +56,10 @@ void matmul(int ver, float* A, float* B, int M, int N, int K, int alpha, int bet
         case 5:
             mul55(A, B, M, N, K, alpha, beta);
             break;
+
+        case 6:
+            mul66(A, B, M, N, K, alpha, beta);
+            break;
     }
 }
 
