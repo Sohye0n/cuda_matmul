@@ -39,6 +39,9 @@ main.cpp
 - 1D tiling
 #### ver5
 - 2D tiling
+
+#### ver6 (🚧 ongoing)
+- vectorize GMem & SMem access
 </br>
 
 ## ✍️ 구현 원리
