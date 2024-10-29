@@ -44,12 +44,12 @@ void compare_result(float* A, float* B, float* C, int M, int N, int K){
 
     float ans;
 
-    //C[2][4]    
+    //C[16][4]    
     ans = 0.0f;
     for(int i=0; i<K; i++){
-        ans+=A[2*K+i]*B[i*N+4];
+        ans+=A[16*K+i]*B[i*N+4];
     }
-    printf("ans : %f, matmul result : %f\n",ans, C[2*N+4]);
+    printf("ans : %f, matmul result : %f\n",ans, C[16*N+4]);
 
 
     //C[0][2]

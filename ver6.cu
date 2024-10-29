@@ -43,6 +43,7 @@ __global__ void mul6(float* A, float* B, float* C, int M, int N, int K, int alph
     int innerRowB = threadIdx.x / (bnSize/4);
     int innerColB = threadIdx.x % (bnSize/4);
 
+
     //0. 포인터를 시작점으로
     A += blockIdx.y * K * blockSize;
     B += blockIdx.x * blockSize;
@@ -51,14 +52,27 @@ __global__ void mul6(float* A, float* B, float* C, int M, int N, int K, int alph
     for(int i=0; i<K; i+=bkSize){
 
         float4 tmp = reinterpret_cast<float4 *>(&A[innerRowA * K + innerColA * 4])[0];
-        As[(innerColA + 0) * bmSize + innerRowA] = tmp.x;
-        As[(innerColA + 1) * bmSize + innerRowA] = tmp.y;
-        As[(innerColA + 2) * bmSize + innerRowA] = tmp.z;
-        As[(innerColA + 3) * bmSize + innerRowA] = tmp.w;
-        
+        As[(innerColA * 4 + 0) * blockSize + innerRowA] = tmp.x;
+        As[(innerColA * 4 + 1) * blockSize + innerRowA] = tmp.y;
+        As[(innerColA * 4 + 2) * blockSize + innerRowA] = tmp.z;
+        As[(innerColA * 4 + 3) * blockSize + innerRowA] = tmp.w;
+
         reinterpret_cast<float4 *>(&Bs[innerRowB * bnSize + innerColB * 4])[0]
         = reinterpret_cast<float4*>(&B[innerRowB * N + innerColB * 4])[0];
+        // if(innerRowB==1 && innerColB ==1 && blockIdx.x==0 && blockIdx.y==0){
+        //     tmp = reinterpret_cast<float4*>(&B[innerRowB * N + innerColB * 4])[0];
+        //     printf("%.1f %1.f %1.f %1.f\n",tmp.x, tmp.y, tmp.z, tmp.w);
+        // }
         __syncthreads();
+
+        if(innerRowA==0 && innerColA ==0){
+            for(int i=0; i<bkSize; i++){
+                for(int k=0; k<blockSize; k++){
+                    printf("%.1f ",As[i*blockSize+k]);
+                }
+                printf("\n\n\n");
+            }
+        }
  
         A += bkSize;
         B += bkSize * N;
@@ -66,12 +80,11 @@ __global__ void mul6(float* A, float* B, float* C, int M, int N, int K, int alph
 
         for(int dotIdx=0; dotIdx<bkSize; ++dotIdx){
             
-            //As row들 고정, Bs의 column을 바꿔가며 연산
             for(int i=0; i<TM; ++i){
                 AsReg[i] = As[threadRow * TM + dotIdx * blockSize + i];
             }
             for(int j=0; j<TN; ++j){
-                BsReg[j] = Bs[threadCol * TN + dotIdx * blockSize + j];
+                BsReg[j] = Bs[threadCol * TN + dotIdx * bnSize + j];
             }
 
             for(int r=0; r<TM; r++){
@@ -99,7 +112,7 @@ __global__ void mul6(float* A, float* B, float* C, int M, int N, int K, int alph
 
 void mul66(float*A, float* B, int M, int N, int K, int alpha, int beta){
     const int TM = 4;
-    const int TN = 8;
+    const int TN = 4;
     const int blockSize = 64;
 
     assert(blockSize % TM == 0);
